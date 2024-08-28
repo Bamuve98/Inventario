@@ -1,5 +1,3 @@
-# Borrador nuevo inventario
-
 import pandas as pd
 from datetime import datetime
 import math
@@ -13,15 +11,15 @@ dia_semana_numero_corr = fecha_hora_utc.weekday() + 1 #Corrige el indice, ya que
 dias_semana_texto = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo']
 dia_semana_texto = dias_semana_texto[dia_semana_numero]
 
-#Creacion de Dataframes
+#Creacion de Dataframe para alcoholes
 
 destilados = pd.read_excel(path, sheet_name='Alcohol')
 columnas = destilados.columns[0], destilados.columns[-1] #Columna de etiquetas y columna del inventario del dia actual
 stock_hoy = pd.read_excel(path, sheet_name='Alcohol', usecols=columnas)
 
-print(stock_hoy)
+#print(stock_hoy) #Check para ver que todo este OK
 
-#Creacion de Sub-DataFrames para un analisis mas limpio
+#Creacion de funciones recurrentes para el codigo
 
 def pedir(liquido, cantidad, optimo):
     if cantidad < optimo:
@@ -51,10 +49,13 @@ def stock(inicio, fin):
     liquido_stock = stock_hoy.loc[inicio:fin].reset_index(drop=True).fillna(0) #reset de indices y se rellenan los espacios faltantes con 0 ***** OJO CON ESTO
     return liquido_stock
 
+#Creacion de Sub-DataFrames para un analisis mas limpio
+
 #Pisco
 piscos_stock = stock(0,12)
 
 #print(piscos_stock) # Check para Revisar si esta todo OK
+print("Pisco: \n")
 
 for i in range(len(piscos_stock.index)):
     pisco, dia, cantidad = desgloe(piscos_stock)
@@ -84,6 +85,7 @@ print("\n")
 ron_stock = stock(13,21)
 
 #print(ron_stock) # Check para revisar si esta todo OK
+print("Ron: \n")
 
 for i in range(len(ron_stock.index)):
     ron, dia, cantidad = desgloe(ron_stock)
@@ -101,6 +103,7 @@ print("\n")
 gin_stock = stock(23,28)
         
 #print(gin_stock) # Check para revisar si esta todo OK
+print("Gin: \n")
         
 for i in range(len(gin_stock.index)):
     gin, dia, cantidad = desgloe(gin_stock)
@@ -128,6 +131,7 @@ print("\n")
 whisky_stock = stock(30,39)
 
 #print(whisky_stock) # Check para ver que todo vaya bien
+print("Whisky: \n")
 
 for i in range(len(whisky_stock.index)):
     whisky, dia, cantidad = desgloe(whisky_stock)
@@ -145,6 +149,7 @@ print("\n")
 voda_stock = stock(41,44)
 
 #print(voda_stock) # Check para ver que todo este OK
+print("Vodka: \n")
     
 for i in range(len(voda_stock.index)):
     vodka, dia, cantidad = desgloe(voda_stock)
@@ -157,6 +162,7 @@ print("\n")
 tequila_stock = stock(45,48)
 
 #print(tequila_stock) # Check para ver que todo este OK
+print("Tequila: \n")
     
 for i in range(len(tequila_stock.index)):
     tequila, dia, cantidad = desgloe(tequila_stock)
@@ -169,6 +175,7 @@ print("\n")
 licores_stock = stock(50, 68)
 
 #print(licores_stock) # Check para ver que todo este OK
+print("Licores: \n")
 
 for i in range(len(licores_stock.index)):
     licor, dia, cantidad = desgloe(licores_stock)
@@ -193,6 +200,7 @@ print("\n")
 cerveza_stock = stock(70, 87)
 
 #print(cerveza_stock) #Check para ver que todo este OK
+print("Cervezas: \n")
 
 for i in range(len(cerveza_stock.index)):
     cerveza, dia, cantidad = desgloe(cerveza_stock)
@@ -202,11 +210,15 @@ for i in range(len(cerveza_stock.index)):
         pedir_pack(cerveza, cantidad, 4, 24)
     elif i in idx_alta_rotacion:
         pedir_pack(cerveza, cantidad, 12, 24)
-    
+  
+print("\n")  
+
+
 #Barriletes
 barrilete_stock = stock(88, 91)
     
 #print(barrilete_stock) # Check para ver que todo este OK
+print("Barriletes: \n")
     
 for i in range(len(barrilete_stock.index)):
     barrilete, dia, cantidad = desgloe(barrilete_stock)
@@ -224,6 +236,7 @@ print("\n")
 vinos_blancos_stock = stock(98, 109)
 
 #print(vinos_blancos_stock) # Check para ver que todo este OK
+print("Vinos: \n")
 
 for i in range(len(vinos_blancos_stock.index)):
     vino_blanco, dia, cantidad = desgloe(vinos_blancos_stock)
@@ -263,6 +276,7 @@ print("\n")
 espumante_stock = stock(164, 180)
 
 #print(espumante_stock) # Check para ver que todo este OK
+print("Espumantes: \n")
 
 for i in range(len(espumante_stock.index)):
     espumante, dia, cantidad = desgloe(espumante_stock)
@@ -292,6 +306,7 @@ stock_hoy = pd.read_excel(path, sheet_name='Liquidos', usecols=columnas)
 bebida_stock = stock(1, 24)
 
 #print(bebida_stock) # Check para ver que todo este OK
+print("Bebidas: \n")
 
 for i in range(len(bebida_stock.index)):
     bebida, dia, cantidad = desgloe_bebidas(bebida_stock)
@@ -300,9 +315,20 @@ for i in range(len(bebida_stock.index)):
     if i in idx_cocacola:
         if i == 1 or i == 4: # Coca-Cola 0 350 y 220
             pedir_pack(bebida, cantidad, 120, 24)
-        elif i in [18,19]:
+        elif i in [18,19]: # Fanta
             pedir_pack(bebida, cantidad, 24, 24)
         else: 
             pedir_pack(bebida, cantidad, 48, 24)
     elif i in idx_pepsi:
-        pass
+        if (i == 21 or i == 23): # Pepsi 0 350 y 220
+            if dia_semana_numero_corr == 3 or dia_semana_numero_corr == 5: # Promo dia jueves y sabado
+                pedir_pack(bebida, cantidad, 180, 24)
+            else:
+                pedir_pack(bebida, cantidad, 96, 24)
+        elif i in [11,15,16]:
+            if dia_semana_numero_corr == 2 or dia_semana_numero_corr == 5: #Promo dia miercoles y sabado
+                pedir_pack(bebida, cantidad, 120, 24)
+            else:
+                pedir_pack(bebida, cantidad, 72, 24)
+        else:
+            pedir_pack(bebida, cantidad, 48, 24)
